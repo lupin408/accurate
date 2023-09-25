@@ -6,22 +6,22 @@ import (
 )
 
 /*
-An AccurateFloat represents a signed floating point number that can do accurate calculations, meaning there are no inaccuracies when storing a value, unlike with traditional floats in computer science. An empty AccurateFloat should not be considered a valid value and can not be used in artihmetic.
+A Float represents a signed floating point number that can do accurate calculations, meaning there are no inaccuracies when storing a value, unlike with traditional floats in computer science. An empty Float should not be considered a valid value and can not be used in artihmetic.
 
-Operations always take pointer arguments (*AccurateFloat) rather than AccurateFloat values, and each unique AccurateFloat value requires its own unique *AccurateFloat pointer. To "copy" a AccurateFloat value, an existing (or newly allocated) AccurateFloat must be set to a new value using the AccurateFloat.Set method; shallow copies of AccurateFloat are not supported and may lead to errors.
+Operations always take pointer arguments (*Float) rather than Float values, and each unique Float value requires its own unique *Float pointer. To "copy" a Float value, an existing (or newly allocated) Float must be set to a new value using the Float.Set method; shallow copies of Float are not supported and may lead to errors.
 
-Note that methods may leak the AccurateFloat's value through timing side-channels. Because of this and because of the scope and complexity of the implementation, AccurateFloat is not well-suited to implement cryptographic operations.
+Note that methods may leak the Float's value through timing side-channels. Because of this and because of the scope and complexity of the implementation, Float is not well-suited to implement cryptographic operations.
 
-Note that arithmetic with AccurateFloats is orders of magnitude slower than native floats. AccurateFloats should only ever be used if no other solution is suitable and exact value accuracy is worth the drastically increased computation time.
+Note that arithmetic with Floats is orders of magnitude slower than native floats. Floats should only ever be used if no other solution is suitable and exact value accuracy is worth the drastically increased computation time.
 */
-type AccurateFloat struct {
+type Float struct {
 	Value           string `json:"Value"`
 	SubOnePrecision uint   `json:"SubOnePrecision"`
 	NonDecRep       string `json:"NonDecRep"`
 }
 
 // Set will change the value of x to v
-func (x *AccurateFloat) Set(v string) {
+func (x *Float) Set(v string) {
 	x.Value = v
 	var decSpots uint = 0
 	var decBool bool = false
@@ -41,10 +41,10 @@ func (x *AccurateFloat) Set(v string) {
 
 }
 
-// NewAccurateFloat allocates and returns a pointer to a new AccurateFloat set to v
-func NewAccurateFloat(v string) *AccurateFloat {
-	//creates an empty instance of an AccurateFloat
-	var x AccurateFloat = AccurateFloat{Value: "0", SubOnePrecision: 0, NonDecRep: "0"}
+// NewFloat allocates and returns a pointer to a new Float set to v
+func NewFloat(v string) *Float {
+	//creates an empty instance of an Float
+	var x Float = Float{Value: "0", SubOnePrecision: 0, NonDecRep: "0"}
 
 	x.Value = v
 	var decSpots uint = 0
@@ -75,7 +75,7 @@ func NewAccurateFloat(v string) *AccurateFloat {
 // TODO: check 0 decimal places and 1 decimal place
 
 // Div computes the quotient a/b for b != 0 and returns the quotient. If y == 0, Div returns nil. Div will round down to d decimal places while trimming off trailing zeroes (after the decimal place), e.g. 100/10 = 10.0 regardless of if d is 1 or 25
-func (a *AccurateFloat) Div(b *AccurateFloat, d uint) *AccurateFloat {
+func (a *Float) Div(b *Float, d uint) *Float {
 
 	decimalPlaces := d
 	if d == 0 {
@@ -193,14 +193,14 @@ func (a *AccurateFloat) Div(b *AccurateFloat, d uint) *AccurateFloat {
 		prefStr = "-" + prefStr
 	}
 
-	var retAF *AccurateFloat = NewAccurateFloat(prefStr + "." + sufStr)
+	var retAF *Float = NewFloat(prefStr + "." + sufStr)
 
 	return retAF
 
 }
 
 // Add computes the sum a+b and returns the sum
-func (a *AccurateFloat) Add(b *AccurateFloat) *AccurateFloat {
+func (a *Float) Add(b *Float) *Float {
 	var negCount uint8 = 0
 	var atp string = a.NonDecRep
 	var btp string = b.NonDecRep
@@ -261,21 +261,21 @@ func (a *AccurateFloat) Add(b *AccurateFloat) *AccurateFloat {
 				prefStr = "-" + prefStr
 			}
 		}
-		var retAF *AccurateFloat = NewAccurateFloat(prefStr + "." + sufStr)
+		var retAF *Float = NewFloat(prefStr + "." + sufStr)
 
 		return retAF
 	} else {
 		//(a == false && b == true) || (a == true && b == false)
 
 		if aneg == false && bneg == true {
-			tempAF := NewAccurateFloat(b.Value[1:])
+			tempAF := NewFloat(b.Value[1:])
 			return a.Sub(tempAF)
 		} else {
 			//(aneg == true && bneg == false)
-			tempAF := NewAccurateFloat(a.Value[1:])
+			tempAF := NewFloat(a.Value[1:])
 			newRes := tempAF.Sub(b)
 			if string(newRes.Value[0]) == "-" {
-				return NewAccurateFloat(newRes.Value[1:])
+				return NewFloat(newRes.Value[1:])
 			} else {
 				nzc := 0
 				for i := 0; i < len(newRes.Value); i++ {
@@ -284,7 +284,7 @@ func (a *AccurateFloat) Add(b *AccurateFloat) *AccurateFloat {
 					}
 				}
 				if nzc > 0 {
-					return NewAccurateFloat("-" + newRes.Value)
+					return NewFloat("-" + newRes.Value)
 				} else {
 					return newRes
 				}
@@ -295,12 +295,12 @@ func (a *AccurateFloat) Add(b *AccurateFloat) *AccurateFloat {
 }
 
 // Sub computes the difference of a-b and returns the difference
-func (a *AccurateFloat) Sub(b *AccurateFloat) *AccurateFloat {
+func (a *Float) Sub(b *Float) *Float {
 	var negCount uint8 = 0
 	var atp string = a.NonDecRep
 	var btp string = b.NonDecRep
 	if a.Value == b.Value {
-		return NewAccurateFloat("0.0")
+		return NewFloat("0.0")
 	}
 	bneg := false
 	aneg := false
@@ -370,7 +370,7 @@ func (a *AccurateFloat) Sub(b *AccurateFloat) *AccurateFloat {
 		if len(prefStr) == 0 {
 			prefStr += "0"
 		}
-		var retAF *AccurateFloat = NewAccurateFloat(prefStr + "." + sufStr)
+		var retAF *Float = NewFloat(prefStr + "." + sufStr)
 
 		return retAF
 	} else {
@@ -407,14 +407,14 @@ func (a *AccurateFloat) Sub(b *AccurateFloat) *AccurateFloat {
 			prefStr = "-" + prefStr
 		}
 
-		var retAF *AccurateFloat = NewAccurateFloat(prefStr + "." + sufStr)
+		var retAF *Float = NewFloat(prefStr + "." + sufStr)
 
 		return retAF
 	}
 }
 
 // Mul computes the product a*b and returns the product
-func (a *AccurateFloat) Mul(b *AccurateFloat) *AccurateFloat {
+func (a *Float) Mul(b *Float) *Float {
 	var negCount uint8 = 0
 	var atp string = a.NonDecRep
 	var btp string = b.NonDecRep
@@ -454,14 +454,14 @@ func (a *AccurateFloat) Mul(b *AccurateFloat) *AccurateFloat {
 	if negCount == 1 {
 		prefStr = "-" + prefStr
 	}
-	var retAF *AccurateFloat = NewAccurateFloat(prefStr + "." + sufStr)
+	var retAF *Float = NewFloat(prefStr + "." + sufStr)
 
 	return retAF
 
 }
 
 // Cmp compares a with b, returning -1 if a < b, 1 if a > b, and 0 if a == b
-func (a *AccurateFloat) Cmp(b *AccurateFloat) int8 {
+func (a *Float) Cmp(b *Float) int8 {
 
 	amags := len(a.Value) - int(a.SubOnePrecision+1)
 	bmags := len(b.Value) - int(b.SubOnePrecision+1)
