@@ -14,6 +14,7 @@ Note that methods may leak the Float's value through timing side-channels. Becau
 
 Note that arithmetic with Floats is orders of magnitude slower than native floats. Floats should only ever be used if no other solution is suitable and exact value accuracy is worth the drastically increased computation time.
 */
+
 type Float struct {
 	Value           string `json:"Value"`
 	SubOnePrecision uint   `json:"SubOnePrecision"`
