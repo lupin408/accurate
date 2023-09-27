@@ -1,4 +1,4 @@
-package float
+package accurate
 
 import (
 	"log"
